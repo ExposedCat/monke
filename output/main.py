@@ -18,7 +18,7 @@ def preload_model():
 def play_text(text: str):
     output = "/tmp/talking-monkey-output.mp3"
     tts.tts_to_file(
-        text=text, speaker_wav="sample.wav", language="en", file_path=output
+        text=text, speaker_wav="sample.mp3", language="en", file_path=output
     )
     playsound(output)
     os.remove(output)
