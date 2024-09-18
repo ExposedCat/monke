@@ -13,7 +13,7 @@ def load_tts():
 
 
 def play_text(text: str, tts: TTS):
-    wav = tts.tts(text=text, speaker="Sofia Hellen", language="en")
+    wav = tts.tts(text=text, speaker="Daisy Studious", language="en")
 
     audio_array = np.array(wav)
     sd.play(audio_array, samplerate=22050)
