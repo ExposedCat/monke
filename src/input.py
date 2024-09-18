@@ -48,6 +48,8 @@ def on_high_volume(
                 recording = False
                 callback(buffer)
                 buffer = b""
+            else:
+                buffer += audio_bytes
 
     try:
         with sd.InputStream(
