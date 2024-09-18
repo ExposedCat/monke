@@ -28,7 +28,7 @@ def high_volume_callback(raw: bytes):
 
 
 input_thread = threading.Thread(
-    target=on_high_volume, args=(high_volume_callback, 0.001, 1)
+    target=on_high_volume, args=(high_volume_callback, 0.002, 1)
 )
 
 print("Listening for input..")
