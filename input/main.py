@@ -3,12 +3,16 @@ import speech_recognition as sr
 import whisper
 import torch
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from queue import Queue
 from time import sleep
+import typing
+from utils import state
 
 
-def start_recording(handle_io, record_timeout=2, phrase_timeout=3):
+def start_recording(
+    handle_io: typing.Callable[[str], None], record_timeout=2, phrase_timeout=3
+):
     data_queue = Queue()
 
     # Create recorder
@@ -27,6 +31,9 @@ def start_recording(handle_io, record_timeout=2, phrase_timeout=3):
 
     # Start recording audio in background
     def record_callback(_, audio: sr.AudioData) -> None:
+        if state.is_busy:
+            print("...")
+            return
         data = audio.get_raw_data()
         data_queue.put(data)
 
@@ -43,8 +50,9 @@ def start_recording(handle_io, record_timeout=2, phrase_timeout=3):
     last_talking_at = None
 
     while True:
+        print("loop")
         try:
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             if not data_queue.empty():
                 last_talking_at = now
 
@@ -58,8 +66,10 @@ def start_recording(handle_io, record_timeout=2, phrase_timeout=3):
 
                 # Convert audio to text
                 result = model.transcribe(audio_np, fp16=torch.cuda.is_available())
+                print("Sound result", result)
                 text = result["text"].strip()
                 if text:
+                    print("Found voice -> adding")
                     text_input += f'{" " if text_input else ""}{text}'
             else:
                 # On a threshold, handle I/O
@@ -69,7 +79,11 @@ def start_recording(handle_io, record_timeout=2, phrase_timeout=3):
                     and now - last_talking_at > timedelta(seconds=phrase_timeout)
                 ):
                     last_talking_at = None
+                    state.is_busy = True
                     handle_io(text_input)
+                    print(
+                        "Calling callback - done"
+                    )
                     text_input = ""
                 sleep(0.25)
         except KeyboardInterrupt:

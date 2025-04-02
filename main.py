@@ -2,6 +2,7 @@ import torch
 from input.main import start_recording
 from processing.main import generate_response
 from output.main import play_text, preload_model
+# import logging
 
 if not torch.cuda.is_available():
     print("Failed to start: ROCm torch not found")
@@ -15,6 +16,8 @@ def update_line(text: str):
 
 
 if __name__ == "__main__":
+    # setup_logging()
+
     preload_model()
 
     def handle_io(text_input: str):

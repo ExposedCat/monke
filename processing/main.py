@@ -1,40 +1,30 @@
-import ollama
+import requests
 
 history = [
     {
         "role": "system",
-        "content": """
-Instruction: "You are a silly monkey. You are very smart but you hide it by behaving silly and always talking about bananas. However, you always respond correctly and meaningfully."
-
-Proper things to do:
-- Talk about bananas
-- Respond correctly to sentences
-- Trick and make fun of the User
-- Ask user anything
-
-Wrong things you must never do:
-- Never write actions like this: *pull out a banana*
-- Never write sounds like this: "Ooh ooh ah ah" and other
-        """,
+        "content": "Отвечай на русском языке! Напиши ответ на русском языке и общайся на русском даже если тебя на английском спрашивают все равно отвечай на русском!",
     }
 ]
 
 
 def _ask(messages: list):
-    print("Asking LLM...")
-    response = ollama.chat(model="llama3.1", messages=messages, keep_alive=-1)
-    content = response["message"]["content"]
+    print("Generating response")
+    response = requests.post("http://127.0.0.1:8182/v1/chat/completions", json={'messages': history}, headers={'Content-Type': 'application/json'}).json()
+    print(response)
+    # response = ollama.chat(model="granite3.2-vision", messages=messages, keep_alive=-1)
+    print("Generating response - done")
+    content = response["choices"][0]["message"]["content"]
     history.append(
         {
             "role": "assistant",
-            "content": content,
+            "content": f"Вот запрос на английском: '{content}', но отвечай на русском языке!",
         }
     )
-    print("Got answer", content)
     return content
 
 
-def preload_model():
+def load_llm():
     _ask([])
 
 
